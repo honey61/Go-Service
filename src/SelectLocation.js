@@ -1,128 +1,279 @@
-import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  Modal,
-  ScrollView,
-  StyleSheet,
-  TouchableWithoutFeedback,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
+import AntDesign from '@expo/vector-icons/AntDesign';
+
+const data = {
+  countries: {
+    '1': {
+      label: 'Country1',
+      states: {
+        '1': {
+          label: 'State1',
+          cities: {
+            '1': { label: 'City1', towns: { '1': { label: 'Town1' }, '2': { label: 'Town2' }, '3': { label: 'Town3' } } },
+            '2': { label: 'City2', towns: { '4': { label: 'Town4' }, '5': { label: 'Town5' }, '6': { label: 'Town6' } } },
+            '3': { label: 'City3', towns: { '7': { label: 'Town7' }, '8': { label: 'Town8' }, '9': { label: 'Town9' } } },
+          },
+        },
+        '2': { label: 'State2', cities: {} },
+        '3': { label: 'State3', cities: {} },
+      },
+    },
+    '2': {
+      label: 'Country2',
+      states: {
+        '4': { label: 'State4', cities: {} },
+        '5': { label: 'State5', cities: {} },
+        '6': { label: 'State6', cities: {} },
+      },
+    },
+    '3': {
+      label: 'Country3',
+      states: {
+        '7': { label: 'State7', cities: {} },
+        '8': { label: 'State8', cities: {} },
+        '9': { label: 'State9', cities: {} },
+      },
+    },
+  },
+};
 
 const SelectLocation = ({ route }) => {
   const { serviceName } = route.params;
+  const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState([]);
+  const [selectedTown, setSelectedTown] = useState(null);
+  const [isCountryFocus, setIsCountryFocus] = useState(false);
+  const [isStateFocus, setIsStateFocus] = useState(false);
+  const [isCityFocus, setIsCityFocus] = useState(false);
+  const [isTownFocus, setIsTownFocus] = useState(false);
 
-  // Mock data for states, cities, and towns
-  const states = ['State1', 'State2', 'State3']; // Replace with your actual state data
-  const cities = {
-    State1: ['City1_State1', 'City2_State1', 'City3_State1'],
-    State2: ['City1_State2', 'City2_State2', 'City3_State2'],
-    State3: ['City1_State3', 'City2_State3', 'City3_State3'],
-  };
-  const towns = {
-    City1_State1: ['Town1_City1_State1', 'Town2_City1_State1', 'Town3_City1_State1'],
-    // Add towns for other cities and states
-  };
-
-  const openModal = (content) => {
-    setModalContent(content);
-    setModalVisible(true);
+  const renderLabel = (label) => {
+    if (label) {
+      return (
+        <Text style={[styles.label, { color: 'blue' }]}>
+          {label}
+        </Text>
+      );
+    }
+    return null;
   };
 
-  const closeModal = () => {
-    setModalVisible(false);
+  const sendDataToBackend = async () => {
+    try {
+      const selectedData = {
+        serviceName,
+        selectedCountry,
+        selectedState,
+        selectedCity,
+        selectedTown,
+      };
+
+      const response = await fetch('YOUR_BACKEND_API_ENDPOINT', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(selectedData),
+      });
+
+      if (response.ok) {
+        console.log('Data sent successfully');
+        // Handle successful response, e.g., show a success message
+      } else {
+        console.error('Failed to send data to server');
+        // Handle failed response, e.g., show an error message
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      // Handle any other errors, e.g., network errors
+    }
   };
 
-  const handleStatePress = (state) => {
-    setSelectedState(state);
-    setSelectedCity(null);
-    openModal(cities[state]);
+  // Function to handle sending data to the backend when the "OK" button is pressed
+  const handleOkButtonPress = () => {
+    sendDataToBackend();
   };
-
-  const handleCityPress = (city) => {
-    setSelectedCity(city);
-    closeModal();
-  };
-
-  const renderDropdownItem = (item, onPress) => (
-    <TouchableOpacity key={item} onPress={onPress} style={styles.dropdownItem}>
-      <Text>{item}</Text>
-    </TouchableOpacity>
-  );
 
   return (
-    <TouchableWithoutFeedback onPress={closeModal}>
-      <View style={styles.container}>
-        <Text style={styles.serviceText}>{serviceName}</Text>
-
-        <TouchableOpacity onPress={() => openModal(states)} style={styles.dropdownButton}>
-          <Text style={styles.dropdownButtonText}>Select State</Text>
-        </TouchableOpacity>
-
-        {selectedState && (
-          <TouchableOpacity onPress={() => openModal(cities[selectedState])} style={styles.dropdownButton}>
-            <Text style={styles.dropdownButtonText}>Select City</Text>
-          </TouchableOpacity>
-        )}
-
-        <Modal
-          animationType="slide"
-          transparent={true}
-          visible={modalVisible}
-          onRequestClose={closeModal}
-        >
-          <View style={styles.modalContainer}>
-            <ScrollView style={styles.modalContent}>
-              {modalContent.map((item) =>
-                renderDropdownItem(item, () => {
-                  handleCityPress(item);
-                })
-              )}
-            </ScrollView>
-          </View>
-        </Modal>
+    <View style={styles.container}>
+      <View>
+        <Text>Selected Service: {serviceName}</Text>
       </View>
-    </TouchableWithoutFeedback>
+
+      <Dropdown
+        style={[styles.dropdown, isCountryFocus && { borderColor: 'blue' }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={Object.values(data.countries).map(country => ({ label: country.label, value: country.label }))}
+        search
+        maxHeight={300}
+        placeholder={!isCountryFocus ? 'Select country' : '...'}
+        searchPlaceholder="Search..."
+        value={selectedCountry}
+        onFocus={() => setIsCountryFocus(true)}
+        onBlur={() => setIsCountryFocus(false)}
+        onChange={(item) => {
+          setSelectedCountry(item.value);
+          setIsCountryFocus(false);
+        }}
+        renderLeftIcon={() => (
+          <AntDesign
+            style={styles.icon}
+            color={isCountryFocus ? 'blue' : 'black'}
+            name="Safety"
+            size={20}
+          />
+        )}
+      />
+
+      <Dropdown
+        style={[styles.dropdown, isStateFocus && { borderColor: 'blue' }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={selectedCountry ? Object.values(data.countries[selectedCountry].states).map(state => ({ label: state.label, value: state.label })) : []}
+        search
+        maxHeight={300}
+        placeholder={!isStateFocus ? 'Select state' : '...'}
+        searchPlaceholder="Search..."
+        value={selectedState}
+        onFocus={() => setIsStateFocus(true)}
+        onBlur={() => setIsStateFocus(false)}
+        onChange={(item) => {
+          setSelectedState(item.value);
+          setIsStateFocus(false);
+        }}
+        renderLeftIcon={() => (
+          <AntDesign
+            style={styles.icon}
+            color={isStateFocus ? 'blue' : 'black'}
+            name="Safety"
+            size={20}
+          />
+        )}
+      />
+
+      <Dropdown
+        style={[styles.dropdown, isCityFocus && { borderColor: 'blue' }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={selectedState ? Object.values(data.countries[selectedCountry].states[selectedState].cities).map(city => ({ label: city.label, value: city.label })) : []}
+        search
+        maxHeight={300}
+        placeholder={!isCityFocus ? 'Select city' : '...'}
+        searchPlaceholder="Search..."
+        value={selectedCity}
+        onFocus={() => setIsCityFocus(true)}
+        onBlur={() => setIsCityFocus(false)}
+        onChange={(item) => {
+          setSelectedCity(item.value);
+          setIsCityFocus(false);
+        }}
+        renderLeftIcon={() => (
+          <AntDesign
+            style={styles.icon}
+            color={isCityFocus ? 'blue' : 'black'}
+            name="Safety"
+            size={20}
+          />
+        )}
+      />
+
+      <Dropdown
+        style={[styles.dropdown, isTownFocus && { borderColor: 'blue' }]}
+        placeholderStyle={styles.placeholderStyle}
+        selectedTextStyle={styles.selectedTextStyle}
+        inputSearchStyle={styles.inputSearchStyle}
+        iconStyle={styles.iconStyle}
+        data={selectedCity ? Object.values(data.countries[selectedCountry].states[selectedState].cities[selectedCity].towns).map(town => ({ label: town.label, value: town.label })) : []}
+        search
+        maxHeight={300}
+        placeholder={!isTownFocus ? 'Select town' : '...'}
+        searchPlaceholder="Search..."
+        value={selectedTown}
+        onFocus={() => setIsTownFocus(true)}
+        onBlur={() => setIsTownFocus(false)}
+        onChange={(item) => {
+          setSelectedTown(item.value);
+          setIsTownFocus(false);
+        }}
+        renderLeftIcon={() => (
+          <AntDesign
+            style={styles.icon}
+            color={isTownFocus ? 'blue' : 'black'}
+            name="Safety"
+            size={20}
+          />
+        )}
+      />
+
+      {/* OK button to trigger sending data to backend */}
+      <TouchableOpacity onPress={handleOkButtonPress} style={styles.okButton}>
+        <Text style={styles.okButtonText}>OK</Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    backgroundColor: 'white',
     padding: 16,
   },
-  serviceText: {
-    fontSize: 20,
-    fontWeight: 'bold',
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
     marginBottom: 16,
   },
-  dropdownButton: {
-    height: 40,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    justifyContent: 'center',
-    padding: 8,
-    marginBottom: 16,
+  icon: {
+    marginRight: 5,
   },
-  dropdownButtonText: {
+  label: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
     fontSize: 16,
   },
-  modalContainer: {
-    flex: 1,
-    justifyContent: 'flex-end',
+  selectedTextStyle: {
+    fontSize: 16,
   },
-  modalContent: {
-    backgroundColor: 'white',
-    maxHeight: 200,
+  iconStyle: {
+    width: 20,
+    height: 20,
   },
-  dropdownItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderColor: '#ddd',
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  okButton: {
+    backgroundColor: 'blue',
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    marginTop: 16,
+  },
+  okButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

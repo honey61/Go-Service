@@ -44,10 +44,10 @@ const App = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="SplashScreen">
-        <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
+        {/* <Stack.Screen name="SplashScreen" component={SplashScreen} options={{ headerShown: false }} />
         <Stack.Screen name="MainPage" component={MainPage} />
        <Stack.Screen name="LoginScreen" component={LoginScreen} />
-       <Stack.Screen name="Signup" component={SignupScreen} /> 
+       <Stack.Screen name="Signup" component={SignupScreen} />  */}
         <Stack.Screen name="ServicePage" component={ServicePage} />
         <Stack.Screen name="SelectLocation" component={SelectLocation} />
         {/* Add more screens here if needed */}
