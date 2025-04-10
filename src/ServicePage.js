@@ -1,113 +1,273 @@
-// src/ServicePage.js
-import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
-const ServicePage = ({ navigation }) => {
+import React, { useState ,useEffect} from 'react';
+import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
+import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
+
+
+const ServicePage = ({ navigation ,route}) => {
+  const {token} = route.params;
+  const [sidebarVisible, setSidebarVisible] = useState(false);
+  const [sidebarAnim] = useState(new Animated.Value(-250)); // Sidebar starts off-screen
+    const [userData, setUserData] = useState([]);
+   
+  // // Dummy user data (replace with actual user data from your auth system)
+  // const user = {
+  //   name: 'John Doe',
+  //   email: 'john.doe@example.com',
+  // };
+useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch('http://192.168.230.232:3030/Employeeuser-data', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const userDataFromServer = await response.json();
+        // console.log("User Data from API:", JSON.stringify(userDataFromServer, null, 2)); // Detailed log
+        setUserData(userDataFromServer.data || []);
+      
+   
+      } catch (error) {
+        console.error('Error fetching user data:', error.message);
+        setError(error.message);
+      
+      }
+    };
+    fetchUserData();
+  }, [token]);
+  const services = [
+    { name: 'Electrician', icon: 'tool' },
+    { name: 'Plumber', icon: 'dropbox' },
+    { name: 'Carpenter', icon: 'skin' },
+    { name: 'Automobile', icon: 'car' },
+    { name: 'Painter', icon: 'picture' },
+    { name: 'Welder', icon: 'picture' },
+    { name: 'Garbage collector', icon: 'delete' },
+  ];
+
   const handleBoxPress = (serviceName) => {
-    // Handle the box press, e.g., navigate to List.js with the service name
     navigation.navigate('SelectLocation', { serviceName });
   };
 
+  const toggleSidebar = () => {
+    Animated.timing(sidebarAnim, {
+      toValue: sidebarVisible ? -250 : 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+    setSidebarVisible(!sidebarVisible);
+  };
+
+  const handleLogout = () => {
+    // Implement your logout logic here (e.g., clear auth token)
+    alert('Logging out...');
+    navigation.navigate('MainPage'); // Adjust based on your navigation structure
+  };
+
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.navbar}>
-        <Text style={styles.navbarText}>
-          <Image source={require('./Logo.png')} style={styles.logo} /> Go service
-        </Text>
-      </View>
-      <View style={styles.content}>
-        <View>
-          <Image source={require('./l.jpg')} style={styles.l} />
-          <Text style={[{ fontSize: 20 }, { padding: 10 }]}>Service we Offer:</Text>
+    <View style={styles.container}>
+      {/* Sidebar */}
+      <Animated.View style={[styles.sidebar, { transform: [{ translateX: sidebarAnim }] }]}>
+        <View style={styles.sidebarHeader}>
+          <Image source={require('./Logo.png')} style={styles.sidebarLogo} />
+          <Text style={styles.sidebarTitle}>User Profile</Text>
+        </View>
+        {userData.map((user ,index)=>(
+        <View  key ={index} style={styles.userInfo}>
+          <Text style={styles.userName}>{user.username}</Text>
+          <Text style={styles.userEmail}>{user.useremail}</Text>
+        </View>))}
+        <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+          <AntDesign name="logout" size={20} color="#fff" style={styles.logoutIcon} />
+          <Text style={styles.logoutText}>Logout</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {/* Main Content */}
+      <ScrollView style={styles.mainContent}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity onPress={toggleSidebar}>
+            <AntDesign name="menu-fold" size={24} color="#333" />
+          </TouchableOpacity>
+          <Image source={require('./Logo.png')} style={styles.logo} />
+          <Text style={styles.headerText}>Go Service</Text>
         </View>
 
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Electrician')}>
-          {/* Box 1 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Electrician</Text>
-          </View>
-        </TouchableOpacity>
+        {/* Hero Section */}
+        <View style={styles.heroSection}>
+          <Image source={require('./l.jpg')} style={styles.heroImage} />
+          <Text style={styles.heroTitle}>Our Professional Services</Text>
+          <Text style={styles.heroSubtitle}>Choose from our expert services below</Text>
+        </View>
 
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Plumber')}>
-          {/* Box 2 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Plumber</Text>
-          </View>
-        </TouchableOpacity>
+        {/* Services Grid */}
+        <View style={styles.servicesContainer}>
+          {services.map((service, index) => (
+            <TouchableOpacity
+              key={index}
+              style={styles.serviceCard}
+              onPress={() => handleBoxPress(service.name)}
+            >
+              <AntDesign name={service.icon} size={30} color="#24d158" style={styles.serviceIcon} />
+              <Text style={styles.serviceText}>{service.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      </ScrollView>
 
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Carpenter')}>
-          {/* Box 3 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Carpenter</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Automobile')}>
-          {/* Box 4 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Automobile</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Painter')}>
-          {/* Box 5 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Painter</Text>
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.boxRow} onPress={() => handleBoxPress('Welder')}>
-          {/* Box 6 */}
-          <View style={styles.box}>
-            <Text style={styles.boxText}>Welder</Text>
-          </View>
-        </TouchableOpacity>
-      </View>
-    </ScrollView>
+      {/* Overlay when sidebar is open */}
+      {sidebarVisible && (
+        <TouchableOpacity style={styles.overlay} onPress={toggleSidebar} />
+      )}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#f5f5f5',
   },
-  navbar: {
-    backgroundColor: '#2ecc71', // Green color for the navbar
-    padding: 8,
+  sidebar: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 250,
+    backgroundColor: '#fff',
+    zIndex: 1000,
+    elevation: 5,
+    padding: 20,
+    borderRightWidth: 1,
+    borderRightColor: '#ddd',
+  },
+  sidebarHeader: {
+    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: 'black',
+    marginBottom: 30,
   },
-  navbarText: {
-    color: '#ffffff', // White color for the text
-    fontSize: 18,
+  sidebarLogo: {
+    width: 40,
+    height: 40,
+    marginRight: 10,
+  },
+  sidebarTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
+    color: '#333',
   },
-  content: {
-    padding: 16,
-    backgroundColor: '#ffffff',
+  userInfo: {
+    marginBottom: 30,
   },
-  boxRow: {
-    marginBottom: 16,
+  userName: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#333',
+    marginBottom: 5,
   },
-  box: {
-    width: '100%', // Adjust the width as needed
-    height: 100, // Adjust the height as needed
-    backgroundColor: '#2ecc71', // Green color for the box
-    justifyContent: 'center',
+  userEmail: {
+    fontSize: 14,
+    color: '#666',
+  },
+  logoutButton: {
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#24d158',
+    padding: 12,
     borderRadius: 8,
   },
-  boxText: {
-    color: '#ffffff', // White color for the text inside the box
+  logoutIcon: {
+    marginRight: 10,
+  },
+  logoutText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  mainContent: {
+    flex: 1,
+  },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    padding: 15,
+    elevation: 2,
+    borderBottomWidth: 1,
+    borderBottomColor: '#ddd',
   },
   logo: {
-    width: 25, // Adjust the width as needed
-    height: 25, // Adjust the height as needed
+    width: 40,
+    height: 40,
+    marginRight: 10,
+    marginLeft: 15,
   },
-  l: {
-    width: 370, // Adjust the width as needed
-    height: 220, // Adjust the height as needed
+  headerText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  heroSection: {
+    padding: 20,
+    alignItems: 'center',
+  },
+  heroImage: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
+    marginBottom: 15,
+  },
+  heroTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 8,
+  },
+  heroSubtitle: {
+    fontSize: 16,
+    color: '#666',
+  },
+  servicesContainer: {
+    padding: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+  },
+  serviceCard: {
+    width: '48%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 15,
+    marginBottom: 15,
+    alignItems: 'center',
+    elevation: 2,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  serviceIcon: {
+    marginBottom: 10,
+  },
+  serviceText: {
+    fontSize: 16,
+    color: '#333',
+    fontWeight: '500',
+    textAlign: 'center',
+  },
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    zIndex: 999,
   },
 });
 

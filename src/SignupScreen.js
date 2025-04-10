@@ -3,8 +3,10 @@
 
 // src/SignupScreen.js
 import React, { useState } from 'react';
-import { View, Text, Image, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, Image, TextInput, Button, StyleSheet,ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
+import {getGlobalIP} from './globalIP'
+
 
 const SignupScreen = () => {
   const [username, setUsername] = useState('');
@@ -20,7 +22,13 @@ const SignupScreen = () => {
       if (password.length < 5) {
         alert('Password must be at least 5 characters long');
       } else if (password === confpass) {
-        const response = await fetch('http://192.168.1.6:3030/signup', {
+
+       const ip = getGlobalIP();  // Ensure it's called correctly
+           const url = `http://${ip}/signup`;
+     
+     
+  
+        const response = await fetch(url, {//  ip
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -32,14 +40,21 @@ const SignupScreen = () => {
             confpass,
           }),
         });
-  
+        const responseData = await response.json();
         if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
+          if (response.status === 400) {
+            alert(responseData.error); // Show error message for missing fields
+          } else if (response.status === 422) {
+            alert(responseData.error); // Show error message for existing email
+          } else {
+            alert('Failed to create account. Please try again.');
+          }
+          return; // Stop execution if response is not OK
         }
   
-        const result = await response.json();
   
-        if (result.success) {
+  
+        if (responseData.success) {
           alert('Account created successfully!');
           navigation.navigate('LoginScreen');
      
@@ -51,7 +66,7 @@ const SignupScreen = () => {
       }
     } catch (error) {
       console.error('Error creating account:', error.message);
-      alert('Email already exist');
+      // alert('Email already exist');
     }
   };
   
@@ -61,6 +76,7 @@ const SignupScreen = () => {
   };
 
   return (
+        <ScrollView style={styles.scrollContainer}>
     <View style={styles.container}>
       <Image
         source={require('./Logo.png')} // Change the path accordingly
@@ -113,10 +129,14 @@ const SignupScreen = () => {
         <Text style={styles.buttonText}>Signup</Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollContainer: {
+    backgroundColor: 'white',
+  },
   container: {
     color:"black",
     backgroundColor:"white",
@@ -204,3 +224,4 @@ const styles = StyleSheet.create({
 });
 
 export default SignupScreen;
+

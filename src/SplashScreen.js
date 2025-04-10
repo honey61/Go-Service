@@ -1,7 +1,7 @@
 // src/SplashScreen.js
 import React, { useEffect } from 'react';
 import { View, Image, StyleSheet } from 'react-native';
-
+import {getGlobalIP} from './globalIP'
 const SplashScreen = ({ navigation }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -13,9 +13,8 @@ const SplashScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      {/* Replace the source with the path to your image */}
       <Image
-        source={require('./Logo.png')} // Change the path accordingly
+        source={require('./Logo.png')} 
         style={styles.logo}
       />
     </View>
@@ -25,13 +24,13 @@ const SplashScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#5adca3', // Green background color
+    backgroundColor: '#5adca3', 
     justifyContent: 'center',
     alignItems: 'center',
   },
   logo: {
-    width: 100, // Adjust the width as needed
-    height: 100, // Adjust the height as needed
+    width: 100, 
+    height: 100, 
   },
 });
 

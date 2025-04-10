@@ -1,232 +1,113 @@
-import React, { useState, useEffect } from 'react';
+
+
+
+import React, { useState } from 'react';
 import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
+import { useNavigation } from '@react-navigation/native';
 
-const data = {
-  countries: {
-    '1': {
-      label: 'Country1',
-      states: {
-        '1': {
-          label: 'State1',
-          cities: {
-            '1': { label: 'City1', towns: { '1': { label: 'Town1' }, '2': { label: 'Town2' }, '3': { label: 'Town3' } } },
-            '2': { label: 'City2', towns: { '4': { label: 'Town4' }, '5': { label: 'Town5' }, '6': { label: 'Town6' } } },
-            '3': { label: 'City3', towns: { '7': { label: 'Town7' }, '8': { label: 'Town8' }, '9': { label: 'Town9' } } },
-          },
-        },
-        '2': { label: 'State2', cities: {} },
-        '3': { label: 'State3', cities: {} },
-      },
-    },
-    '2': {
-      label: 'Country2',
-      states: {
-        '4': { label: 'State4', cities: {} },
-        '5': { label: 'State5', cities: {} },
-        '6': { label: 'State6', cities: {} },
-      },
-    },
-    '3': {
-      label: 'Country3',
-      states: {
-        '7': { label: 'State7', cities: {} },
-        '8': { label: 'State8', cities: {} },
-        '9': { label: 'State9', cities: {} },
-      },
-    },
+const locationData = {
+  cities: {
+    uttarakhand: [
+      { label: 'Dehradun', value: 'Dehradun' },
+      { label: 'Haridwar', value: 'haridwar' },
+    ],
+    himachal: [
+      { label: 'Shimla', value: 'shimla' },
+      { label: 'Manali', value: 'manali' },
+    ],
+    california: [
+      { label: 'Los Angeles', value: 'los_angeles' },
+      { label: 'San Francisco', value: 'san_francisco' },
+    ],
+  },
+  towns: {
+    Dehradun: [
+      { label: 'Rajpur', value: 'Rajpur' },
+      { label: 'Doiwala', value: 'Doiwala' },
+    ],
+    Shimla: [
+      { label: 'Town3', value: 'town3' },
+      { label: 'Town4', value: 'town4' },
+    ],
   },
 };
 
 const SelectLocation = ({ route }) => {
   const { serviceName } = route.params;
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedState, setSelectedState] = useState(null);
+  const navigation = useNavigation();
+
   const [selectedCity, setSelectedCity] = useState(null);
   const [selectedTown, setSelectedTown] = useState(null);
-  const [isCountryFocus, setIsCountryFocus] = useState(false);
-  const [isStateFocus, setIsStateFocus] = useState(false);
-  const [isCityFocus, setIsCityFocus] = useState(false);
-  const [isTownFocus, setIsTownFocus] = useState(false);
 
-  const renderLabel = (label) => {
-    if (label) {
-      return (
-        <Text style={[styles.label, { color: 'blue' }]}>
-          {label}
-        </Text>
-      );
+  const handleSubmit = () => {
+    if (!selectedCity || !selectedTown) {
+      alert('Please select both city and town before submitting.');
+      return;
     }
-    return null;
-  };
 
-  const sendDataToBackend = async () => {
-    try {
-      const selectedData = {
-        serviceName,
-        selectedCountry,
-        selectedState,
-        selectedCity,
-        selectedTown,
-      };
-
-      const response = await fetch('YOUR_BACKEND_API_ENDPOINT', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(selectedData),
-      });
-
-      if (response.ok) {
-        console.log('Data sent successfully');
-        // Handle successful response, e.g., show a success message
-      } else {
-        console.error('Failed to send data to server');
-        // Handle failed response, e.g., show an error message
-      }
-    } catch (error) {
-      console.error('Error:', error);
-      // Handle any other errors, e.g., network errors
-    }
-  };
-
-  // Function to handle sending data to the backend when the "OK" button is pressed
-  const handleOkButtonPress = () => {
-    sendDataToBackend();
+    // Navigate to UserProfile and pass selected details
+    navigation.navigate('UserProfile', {
+      serviceName,
+      selectedCity,
+      selectedTown,
+    });
   };
 
   return (
     <View style={styles.container}>
-      <View>
-        <Text>Selected Service: {serviceName}</Text>
-      </View>
+      <Text style={styles.title}>Selected Service: {serviceName}</Text>
 
       <Dropdown
-        style={[styles.dropdown, isCountryFocus && { borderColor: 'blue' }]}
+        style={styles.dropdown}
         placeholderStyle={styles.placeholderStyle}
         selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={Object.values(data.countries).map(country => ({ label: country.label, value: country.label }))}
-        search
-        maxHeight={300}
-        placeholder={!isCountryFocus ? 'Select country' : '...'}
-        searchPlaceholder="Search..."
-        value={selectedCountry}
-        onFocus={() => setIsCountryFocus(true)}
-        onBlur={() => setIsCountryFocus(false)}
-        onChange={(item) => {
-          setSelectedCountry(item.value);
-          setIsCountryFocus(false);
-        }}
-        renderLeftIcon={() => (
-          <AntDesign
-            style={styles.icon}
-            color={isCountryFocus ? 'blue' : 'black'}
-            name="Safety"
-            size={20}
-          />
-        )}
-      />
-
-      <Dropdown
-        style={[styles.dropdown, isStateFocus && { borderColor: 'blue' }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={selectedCountry ? Object.values(data.countries[selectedCountry].states).map(state => ({ label: state.label, value: state.label })) : []}
-        search
-        maxHeight={300}
-        placeholder={!isStateFocus ? 'Select state' : '...'}
-        searchPlaceholder="Search..."
-        value={selectedState}
-        onFocus={() => setIsStateFocus(true)}
-        onBlur={() => setIsStateFocus(false)}
-        onChange={(item) => {
-          setSelectedState(item.value);
-          setIsStateFocus(false);
-        }}
-        renderLeftIcon={() => (
-          <AntDesign
-            style={styles.icon}
-            color={isStateFocus ? 'blue' : 'black'}
-            name="Safety"
-            size={20}
-          />
-        )}
-      />
-
-      <Dropdown
-        style={[styles.dropdown, isCityFocus && { borderColor: 'blue' }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={selectedState ? Object.values(data.countries[selectedCountry].states[selectedState].cities).map(city => ({ label: city.label, value: city.label })) : []}
-        search
-        maxHeight={300}
-        placeholder={!isCityFocus ? 'Select city' : '...'}
-        searchPlaceholder="Search..."
+        data={Object.values(locationData.cities).flat()}
+        labelField="label"
+        valueField="value"
+        placeholder="Select city"
         value={selectedCity}
-        onFocus={() => setIsCityFocus(true)}
-        onBlur={() => setIsCityFocus(false)}
         onChange={(item) => {
           setSelectedCity(item.value);
-          setIsCityFocus(false);
+          setSelectedTown(null);
         }}
-        renderLeftIcon={() => (
-          <AntDesign
-            style={styles.icon}
-            color={isCityFocus ? 'blue' : 'black'}
-            name="Safety"
-            size={20}
-          />
-        )}
+        renderLeftIcon={() => <AntDesign style={styles.icon} name="home" size={20} />}
       />
 
-      <Dropdown
-        style={[styles.dropdown, isTownFocus && { borderColor: 'blue' }]}
-        placeholderStyle={styles.placeholderStyle}
-        selectedTextStyle={styles.selectedTextStyle}
-        inputSearchStyle={styles.inputSearchStyle}
-        iconStyle={styles.iconStyle}
-        data={selectedCity ? Object.values(data.countries[selectedCountry].states[selectedState].cities[selectedCity].towns).map(town => ({ label: town.label, value: town.label })) : []}
-        search
-        maxHeight={300}
-        placeholder={!isTownFocus ? 'Select town' : '...'}
-        searchPlaceholder="Search..."
-        value={selectedTown}
-        onFocus={() => setIsTownFocus(true)}
-        onBlur={() => setIsTownFocus(false)}
-        onChange={(item) => {
-          setSelectedTown(item.value);
-          setIsTownFocus(false);
-        }}
-        renderLeftIcon={() => (
-          <AntDesign
-            style={styles.icon}
-            color={isTownFocus ? 'blue' : 'black'}
-            name="Safety"
-            size={20}
-          />
-        )}
-      />
+      {selectedCity && locationData.towns[selectedCity] && (
+        <Dropdown
+          style={styles.dropdown}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          data={locationData.towns[selectedCity]}
+          labelField="label"
+          valueField="value"
+          placeholder="Select town"
+          value={selectedTown}
+          onChange={(item) => setSelectedTown(item.value)}
+          renderLeftIcon={() => <AntDesign style={styles.icon} name="enviromento" size={20} />}
+        />
+      )}
 
-      {/* OK button to trigger sending data to backend */}
-      <TouchableOpacity onPress={handleOkButtonPress} style={styles.okButton}>
-        <Text style={styles.okButtonText}>OK</Text>
+      <TouchableOpacity style={styles.button} onPress={handleSubmit}>
+        <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
+export default SelectLocation;
+
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'white',
     padding: 16,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 10,
   },
   dropdown: {
     height: 50,
@@ -239,42 +120,26 @@ const styles = StyleSheet.create({
   icon: {
     marginRight: 5,
   },
-  label: {
-    position: 'absolute',
-    backgroundColor: 'white',
-    left: 22,
-    top: 8,
-    zIndex: 999,
-    paddingHorizontal: 8,
-    fontSize: 14,
-  },
   placeholderStyle: {
     fontSize: 16,
   },
   selectedTextStyle: {
     fontSize: 16,
   },
-  iconStyle: {
-    width: 20,
-    height: 20,
-  },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
-  okButton: {
-    backgroundColor: 'blue',
-    borderRadius: 8,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
+  button: {
+    justifyContent: 'center',
     alignItems: 'center',
     marginTop: 16,
+    marginLeft: 66,
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    backgroundColor: '#24d158',
+    borderRadius: 20,
+    width: 200,
   },
-  okButtonText: {
-    color: 'white',
+  buttonText: {
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: 'bold',
   },
 });
-
-export default SelectLocation;

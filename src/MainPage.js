@@ -1,21 +1,31 @@
 // src/MainPage.js
 import React from 'react';
 import { View, Text,Image, TouchableOpacity, StyleSheet } from 'react-native';
+import { useState } from 'react/cjs/react.production.min';
+
 
 const MainPage = ({ navigation }) => {
+
+
   const handleLogin = () => {
     navigation.navigate('LoginScreen');
   };
+  const handleELogin = () => {
+  navigation.navigate('LoginEScreen');
+  };
 
   const handleSignup = () => {
-    navigation.navigate('Signup');
+    navigation.navigate('SignupScreen');
+  };
+  const handleESignup = () => {
+    navigation.navigate('SignupEScreen');
   };
 
 
   return (
     <View style={styles.container}>
        <Image
-        source={require('./Logo.png')} // Change the path accordingly
+        source={require('./Logo.png')} 
         style={styles.logo}
       />
       <Text style={styles.title}>Go Services</Text>
@@ -24,6 +34,12 @@ const MainPage = ({ navigation }) => {
       </TouchableOpacity>
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>User Signup</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleELogin}>
+        <Text style={styles.buttonText}>Employee Login</Text>
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.button} onPress={handleESignup}>
+        <Text style={styles.buttonText}>Employee Signup</Text>
       </TouchableOpacity>
     </View>
   );
@@ -53,13 +69,13 @@ const styles = StyleSheet.create({
     width:200,
   },
   buttonText: {
-    color: '#ffffff', // Set text color
+    color: '#ffffff', 
     fontSize: 16,
     fontWeight: 'bold',
   },
   logo: {
-    width: 80, // Adjust the width as needed
-    height: 80, // Adjust the height as needed
+    width: 80, 
+    height: 80, 
   },
 });
 

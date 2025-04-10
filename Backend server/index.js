@@ -12,6 +12,8 @@ app.use(bodyParser.json()); // support json encoded bodies
 
 app.use(express.json()); // for parsing application/json
 app.use(authrout);
+app.use('/employephoto', express.static('employephoto'));
+
 app.get('/' ,(req,res)=>{
     res.send("Welcome to the API");
 })
@@ -21,5 +23,5 @@ app.post('/post',(req,res)=>{
     res.send("this is post");
 })
 app.listen(port,()=>{
-    console.log("server is running on ${port}");
+    console.log("server is running on 3030");
 })
