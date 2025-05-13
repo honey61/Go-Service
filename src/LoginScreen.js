@@ -61,7 +61,7 @@ const LoginScreen = () => {
           style={styles.input}
           placeholder="Email"
           value={useremail}
-          onChangeText={setUseremail}
+        onChangeText={(text) => setUseremail(text.toLowerCase())}    
           keyboardType="email-address"
         />
         <View style={styles.passwordContainer}>

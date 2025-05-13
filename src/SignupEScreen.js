@@ -6,6 +6,7 @@ import { useNavigation } from '@react-navigation/native';
 import { Dropdown } from 'react-native-element-dropdown';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import * as ImagePicker from 'expo-image-picker';
+import { getGlobalIP } from './globalIP';
 
 const SignupEScreen = () => {
   const [username, setUsername] = useState('');
@@ -108,8 +109,10 @@ const SignupEScreen = () => {
       }
 
       console.log('Sending data:', formData);
-
-      const response = await fetch('http://192.168.230.232:3030/Esignup', {
+        const ip = getGlobalIP();
+        const url = `http://${ip}/Esignup`;
+      
+      const response = await fetch(url, {
         method: 'POST',
         body: formData,
         headers: {
@@ -167,7 +170,7 @@ const SignupEScreen = () => {
             style={styles.input}
             placeholder="Email"
             value={useremail}
-            onChangeText={setUseremail}
+            onChangeText={(text) => setUseremail(text.toLowerCase())} 
             keyboardType="email-address"
           />
           

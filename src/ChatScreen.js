@@ -1,4 +1,6 @@
-// import React, { useState } from 'react';
+
+// import React, { useState, useEffect, useRef } from 'react';
+
 // import { 
 //   View, 
 //   Text, 
@@ -11,33 +13,58 @@
 //   Platform, 
 //   UIManager 
 // } from 'react-native';
+// import io from 'socket.io-client';
+
+// const SOCKET_SERVER_URL = 'http://192.168.230.232:3000'; // Replace with your server URL
 
 // // Enable LayoutAnimation on Android
 // if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
 //   UIManager.setLayoutAnimationEnabledExperimental(true);
 // }
 
-// const ChatScreen = ({route}) => {
+// const ChatScreen = ({ route }) => {
 //   const { userId, username, phoneNumber, profileImage, selectedCity, selectedTown } = route.params;
 //   const [messages, setMessages] = useState([]);
 //   const [inputText, setInputText] = useState('');
-//   const user = { 
-//     name: 'John Doe', 
-//     image: 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png', // Replace with actual profile image URL
-//     status: 'Online' // or 'Offline'
-//   };
+  
+//   // Use useRef to persist the socket connection
+//   const socketRef = useRef(null);
+
+//   useEffect(() => {
+//     // Initialize the socket connection only once
+//     socketRef.current = io(SOCKET_SERVER_URL);
+
+//     // Join the room using the userId
+//     socketRef.current.emit('join_room', userId);
+
+//     // Listen for incoming messages
+//     socketRef.current.on('receive_message', (data) => {
+//       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+//       setMessages((prevMessages) => [...prevMessages, data]);
+//     });
+
+//     // Cleanup the socket on component unmount
+//     return () => {
+//       socketRef.current.disconnect();
+//     };
+//   }, [userId]);  // Only run once when component mounts or userId changes
 
 //   const sendMessage = () => {
 //     if (inputText.trim() === '') return;
     
-//     // Animate layout update
 //     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
 
 //     const newMessage = { 
 //       id: Date.now().toString(), 
 //       text: inputText, 
-//       sender: 'You' 
+//       sender: userId, 
+//       room: userId, 
 //     };
+    
+//     // Emit message to the server
+//     socketRef.current.emit('send_message', newMessage);
+
+//     // Add message to the state to update the UI
 //     setMessages([...messages, newMessage]);
 //     setInputText('');
 //   };
@@ -46,26 +73,21 @@
 //     <View 
 //       style={[
 //         styles.messageContainer, 
-//         item.sender === 'You' ? styles.myMessage : styles.otherMessage
+//         item.sender === userId ? styles.myMessage : styles.otherMessage
 //       ]}
 //     >
 //       <Text style={styles.messageText}>{item.text}</Text>
 //     </View>
 //   );
 
-
-
-
 //   return (
 //     <View style={styles.container}>
 //       {/* Top Bar with User Details */}
 //       <View style={styles.topBar}>
-//         <Image source={{ uri: user.image }} style={user.image} />
+//         <Image source={{ uri: profileImage }} style={styles.userImage} />
 //         <View style={styles.userInfo}>
 //           <Text style={styles.userName}>{username}</Text>
-//           <Text style={[styles.userStatus, user.status === 'Online' ? styles.online : styles.offline]}>
-//             {user.status}
-//           </Text>
+//           <Text style={[styles.userStatus, styles.online]}>Online</Text>
 //         </View>
 //       </View>
 
@@ -105,12 +127,10 @@
 //     padding: 15,
 //     borderBottomWidth: 1,
 //     borderColor: '#ddd',
-//     // Shadow for iOS
 //     shadowColor: '#000',
 //     shadowOffset: { width: 0, height: 2 },
 //     shadowOpacity: 0.1,
 //     shadowRadius: 4,
-//     // Elevation for Android
 //     elevation: 5,
 //   },
 //   userImage: {
@@ -133,9 +153,6 @@
 //   online: {
 //     color: 'green',
 //   },
-//   offline: {
-//     color: 'red',
-//   },
 //   messageList: {
 //     paddingHorizontal: 10,
 //     paddingVertical: 5,
@@ -145,7 +162,6 @@
 //     borderRadius: 10,
 //     marginVertical: 5,
 //     maxWidth: '75%',
-//     // Adding subtle shadow
 //     shadowColor: '#000',
 //     shadowOffset: { width: 0, height: 1 },
 //     shadowOpacity: 0.1,
@@ -196,6 +212,7 @@
 //     fontWeight: 'bold',
 //     fontSize: 16,
 //   },
+
 // });
 
 // export default ChatScreen;
@@ -213,6 +230,7 @@ import {
   UIManager 
 } from 'react-native';
 import io from 'socket.io-client';
+import { useNavigation } from '@react-navigation/native';
 
 const SOCKET_SERVER_URL = 'http://192.168.230.232:3000'; // Replace with your server URL
 
@@ -222,7 +240,9 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 }
 
 const ChatScreen = ({ route }) => {
-  const { userId, username, phoneNumber, profileImage, selectedCity, selectedTown } = route.params;
+  const navigation = useNavigation();
+  const { userId, username, phoneNumber, profileImage, selectedCity, selectedTown,adharnumber,
+experience,selectedCategory } = route.params;
   const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState('');
   
@@ -268,6 +288,22 @@ const ChatScreen = ({ route }) => {
     setInputText('');
   };
 
+  const navigateToProfile = () => {
+    navigation.navigate('ChatProfile', { 
+      user: {
+        userId,
+        username,
+        phoneNumber,
+        profileImage,
+        selectedCity,
+        selectedTown,
+        adharnumber,
+        selectedCategory,
+        experience
+      }
+    });
+  };
+
   const renderMessage = ({ item }) => (
     <View 
       style={[
@@ -281,20 +317,28 @@ const ChatScreen = ({ route }) => {
 
   return (
     <View style={styles.container}>
-      {/* Top Bar with User Details */}
-      <View style={styles.topBar}>
-        <Image source={{ uri: profileImage }} style={styles.userImage} />
+      {/* Top Bar with User Details - Now clickable */}
+      <TouchableOpacity 
+        style={styles.topBar} 
+        onPress={navigateToProfile}
+        activeOpacity={0.7}
+      >
+        <Image 
+          source={{ uri: profileImage || 'https://via.placeholder.com/150' }} 
+          style={styles.userImage} 
+        />
         <View style={styles.userInfo}>
           <Text style={styles.userName}>{username}</Text>
           <Text style={[styles.userStatus, styles.online]}>Online</Text>
         </View>
-      </View>
+      </TouchableOpacity>
 
       <FlatList
         data={messages}
         keyExtractor={(item) => item.id}
         renderItem={renderMessage}
         contentContainerStyle={styles.messageList}
+        inverted
       />
 
       {/* Message Input */}
@@ -381,6 +425,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
   },
+  otherMessageText: {
+    color: '#000',
+  },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -411,7 +458,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 16,
   },
-
 });
 
 export default ChatScreen;

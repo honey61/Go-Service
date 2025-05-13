@@ -56,7 +56,11 @@ const UserProfile = ({ route }) => {
       profileImage: user.profileImage,
       selectedCity: user.selectedCity,
       selectedTown: user.selectedTown,
+      experience: user.experience,
+      adharnumber: user.adharnumber,
+      selectedCategory: user.selectedCategory,
     });
+
   };
 
   return (

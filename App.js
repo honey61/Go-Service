@@ -62,6 +62,7 @@ import UserProfile from './src/UserProfile';
 import EmployeeProfile from './src/EmployeeProfile';
 import SignupEScreen from './src/SignupEScreen';
 import ChatScreen from './src/ChatScreen';
+import ChatProfile from './src/ChatProfile';
 const Stack = createStackNavigator();
 
 const App = () => {
@@ -79,6 +80,7 @@ const App = () => {
         <Stack.Screen name="UserProfile" component={UserProfile} />
         <Stack.Screen name = "EmployeeProfile" component= {EmployeeProfile} />
         <Stack.Screen name = "ChatScreen" component= {ChatScreen} />
+        <Stack.Screen name = "ChatProfile" component= {ChatProfile} />
       </Stack.Navigator>
     </NavigationContainer>
   );

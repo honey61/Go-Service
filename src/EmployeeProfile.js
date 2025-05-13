@@ -2,18 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install @expo/vector-icons
-
+import { getGlobalIP } from './globalIP';
 const EmployeeProfile = ({ route }) => {
   const { token } = route.params;
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+console.log(token);
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('http://192.168.230.232:3030/Employeeuser-data', {
+           const ip = getGlobalIP();
+          const url = `http://${ip}/Employeeuser-data`;
+        
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -48,8 +51,9 @@ const EmployeeProfile = ({ route }) => {
   const handleSave = async () => {
     setIsEditing(false);
     try {
+      const url2 = `http://${ip}/update-profile`;
       const userToUpdate = userData[0];
-      const response = await fetch('http://192.168.230.232:3030/update-profile', {
+      const response = await fetch(url2, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

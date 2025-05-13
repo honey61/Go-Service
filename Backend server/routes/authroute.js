@@ -63,6 +63,7 @@ router.post("/signup", async (req, res) => {
   }
 
   try {
+    
     const existingUser = await User_Signup.findOne({ useremail: useremail }); //checking weather this email already exist in database or not
 
     if (existingUser) {
@@ -251,23 +252,35 @@ router.get('/users', async (req, res) => {
 
 
 //////////////////////////////////////////
-
-//////////////////////////////////////////
-
-
-
-router.get('/Employeeuser-data', async (req, res) => {
+router.get('/user-data', async (req, res) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
     const user = jwt.verify(token, JWT_SECRET);
-    const data = await Employee_Signup.find({ useremail: user.useremail });
+    const data = await User_Signup.find({ useremail: user.useremail });
     res.status(200).json({ success: true, data: data });
   } catch (error) {
     console.error('Error fetching user data:', error.message);
     res.status(500).json({ success: false, error: 'Error fetching user data' });
   }
 });
+//////////////////////////////////////////
 
+
+///////////////////////////////////////////////////
+router.get('/Employeeuser-data', async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1];
+    const user = jwt.verify(token, JWT_SECRET);
+    console.log(user);
+    const data = await Employee_Signup.find({ useremail: user.useremail });
+    console.log(data)
+    res.status(200).json({ success: true, data: data });
+  } catch (error) {
+    console.error('Error fetching user data:', error.message);
+    res.status(500).json({ success: false, error: 'Error fetching user data' });
+  }
+});
+//////////////////////////////////////////
 router.post('/update-profile', async (req, res) => {
   const { username, useremail, number, adharnumber, experience, profileImage } = req.body;
   try {

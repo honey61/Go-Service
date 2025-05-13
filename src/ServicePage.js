@@ -3,33 +3,33 @@ import React, { useState ,useEffect} from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView, Animated } from 'react-native';
 import AntDesign from '@expo/vector-icons/AntDesign';
 import { useNavigation } from '@react-navigation/native';
-
+import { getGlobalIP } from './globalIP';
 
 const ServicePage = ({ navigation ,route}) => {
   const {token} = route.params;
+  
   const [sidebarVisible, setSidebarVisible] = useState(false);
   const [sidebarAnim] = useState(new Animated.Value(-250)); // Sidebar starts off-screen
     const [userData, setUserData] = useState([]);
-   
-  // // Dummy user data (replace with actual user data from your auth system)
-  // const user = {
-  //   name: 'John Doe',
-  //   email: 'john.doe@example.com',
-  // };
+   const ip = getGlobalIP();
+ 
+
 useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await fetch('http://192.168.230.232:3030/Employeeuser-data', {
+       const url =`http://${ip}/user-data`
+        const response = await fetch(url, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
+    
         if (!response.ok) {
           throw new Error('Failed to fetch user data');
         }
         const userDataFromServer = await response.json();
-        // console.log("User Data from API:", JSON.stringify(userDataFromServer, null, 2)); // Detailed log
+         //console.log("User Data from API:", JSON.stringify(userDataFromServer, null, 2)); // Detailed log
         setUserData(userDataFromServer.data || []);
       
    
