@@ -49,7 +49,13 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true,
         
-    }
+    },
+     rating: {
+    type: Number,
+    default: 0,
+    min: 0,
+    max: 5,
+  }
 },
 { collection: "Employee_Signup" }); // Explicitly setting collection name
 

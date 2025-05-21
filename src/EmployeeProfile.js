@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons'; // Make sure to install @expo/vector-icons
 import { getGlobalIP } from './globalIP';
+  const ip = getGlobalIP();
 const EmployeeProfile = ({ route }) => {
   const { token } = route.params;
   const [isEditing, setIsEditing] = useState(false);
@@ -100,7 +101,7 @@ console.log(token);
             <View style={styles.imageContainer}>
               {user.profileImage ? (
             <Image 
-            source={{ uri: `http://192.168.230.232:3030/${user.profileImage}` }} 
+            source={{ uri: `http://${ip}/${user.profileImage}` }} 
             style={styles.image} 
             resizeMode="cover"
           />

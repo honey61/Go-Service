@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Linking } from 'react-native';
 import { getGlobalIP } from './globalIP';
 import { useNavigation } from '@react-navigation/native';
-
+    const ip = getGlobalIP();
 
 
 const UserProfile = ({ route }) => {
@@ -16,9 +16,10 @@ const UserProfile = ({ route }) => {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const ip = getGlobalIP();
+        // const ip = getGlobalIP();
         const url = `http://${ip}/users?selectedCategory=${serviceName}&selectedCity=${selectedCity}&selectedTown=${selectedTown}`;
         const response = await fetch(url);
+
         if (response.ok) {
           const data = await response.json();
           setUserData(data);
@@ -65,11 +66,12 @@ const UserProfile = ({ route }) => {
 
   return (
     <ScrollView>
+      
       <Text style={styles.title}>List of {serviceName} in {selectedTown}, {selectedCity}</Text>
       {userData.length > 0 ? (
         userData.map((user, index) => (
           <View key={index} style={styles.container}>
-            <Image source={{ uri: `http://192.168.230.232:3030/${user.profileImage}` }} style={styles.circleImage} />
+            <Image source={{ uri: `http://${ip}/${user.profileImage}` }} style={styles.circleImage} />
             <View style={styles.userInfo}>
               <Text style={styles.name}>{user.username}</Text>
               <Text style={styles.experience}>Contact No : {user.number} </Text>

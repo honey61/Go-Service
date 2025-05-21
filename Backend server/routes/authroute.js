@@ -241,7 +241,7 @@ router.get('/users', async (req, res) => {
     const users = await Employee_Signup.find({ selectedCategory,
       selectedCity,selectedTown});
   //  const s = json(users);
-  //  console.log(s);
+  //  console.log(users);
     res.json(users);
   
   } catch (error) {
@@ -271,7 +271,7 @@ router.get('/Employeeuser-data', async (req, res) => {
   try {
     const token = req.headers.authorization.split(' ')[1];
     const user = jwt.verify(token, JWT_SECRET);
-    console.log(user);
+    //console.log(user);
     const data = await Employee_Signup.find({ useremail: user.useremail });
     console.log(data)
     res.status(200).json({ success: true, data: data });
